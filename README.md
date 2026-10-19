@@ -11,13 +11,14 @@ check, and list the latest prices.
 - **Occupancy:** 2 rooms = (2 adults + 1 infant) + (2 adults) — editable
 - **Area:** ≤ ~15-minute walk from Shibuya Scramble Crossing
 - **Budget:** CAD $375 total (both rooms combined, taxes & fees included) — editable
-- **Sources (free, ToS-safe):**
-  - Booking.com's own public availability JSON endpoint
-    (same endpoint their public search page uses — no scraping of HTML)
-  - Google Hotels via **SerpAPI** (optional, needs a free API key; 100 free
-    searches/month). If omitted, Booking.com alone is used.
-  - A shortlist of properties fetched directly by hotel ID so results are
-    deterministic.
+- **Default source: fully local Booking.com search via Playwright.**
+  The bot drives a headless Chromium on your own machine, loads the
+  public Booking.com search page with your dates and occupancy, and
+  reads prices directly from the rendered results. No account, no API
+  key, no third-party service.
+- **Optional: Google Hotels via SerpAPI.** If you *do* set a
+  `SERPAPI_KEY` in `.env`, the bot uses that instead — faster and more
+  reliable, but SerpAPI's free tier requires phone verification.
 
 > **Why not Airbnb / Expedia / Agoda directly?** Airbnb has no public API
 > and actively blocks scrapers. Expedia and Agoda use the same inventory
@@ -45,9 +46,10 @@ All within ~15-min walk of Shibuya Crossing:
 | 11 | Dormy Inn Premium Shibuya Jingumae | 13 min |
 | 12 | Shibuya Hotel En | 10 min |
 
-The bot queries Google Hotels directly via SerpAPI with
-`q="hotels near Shibuya Scramble Crossing"`, so hotels on this list surface
-automatically when their prices qualify. You don't need to pre-seed IDs.
+The bot searches Booking.com (or Google Hotels via SerpAPI, if you
+opted in) for `"Shibuya, Tokyo"`, so any property in the area with
+available inventory for your dates surfaces automatically — this list
+is a reference, not a filter. You don't need to pre-seed IDs.
 
 ## Telegram commands
 
@@ -80,10 +82,14 @@ hit the budget, so you can see the trend.
 git clone <this-repo>
 cd japan-hotels
 
-# 2. Make a virtualenv (Python 3.10+)
+# 2. Make a virtualenv (Python 3.10–3.13 recommended; 3.14 works too)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
+# 2b. Install the headless Chromium that the local scraper drives
+#     (one-time, ~150MB download):
+playwright install chromium
 
 # 3. Create a Telegram bot
 #    - Open Telegram, message @BotFather
@@ -130,6 +136,7 @@ app/
   fx.py            # JPY <-> CAD rate (open.er-api.com, no key)
   hotels.py        # Booking.com availability JSON client
   serpapi_hotels.py# Optional Google Hotels via SerpAPI
+  booking_scraper.py # Default: fully-local Booking.com Playwright scraper
   notify.py        # Compose + send Telegram alerts
 .env.example
 requirements.txt

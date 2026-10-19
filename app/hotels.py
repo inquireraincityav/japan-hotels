@@ -10,7 +10,7 @@ from __future__ import annotations
 import itertools
 from urllib.parse import quote_plus
 
-from . import config, serpapi_hotels
+from . import booking_scraper, config, serpapi_hotels
 
 WALK_SHORTLIST_QUERY = "hotels near Shibuya Scramble Crossing"
 
@@ -66,10 +66,18 @@ def check() -> dict:
     rows: list[dict] = []
     per_room_offers: list[list[dict]] = []
 
+    # Pick the data source: SerpAPI when the user set up a key, otherwise
+    # the fully-local Playwright Booking.com scraper (no account needed).
+    search_fn = (
+        serpapi_hotels.search_room_bucket
+        if config.serpapi_key()
+        else booking_scraper.search_room_bucket
+    )
+
     for i, bucket in enumerate(cfg["rooms"]):
         adults = int(bucket["adults"])
         kids = list(bucket.get("children_ages") or [])
-        offers = serpapi_hotels.search_room_bucket(
+        offers = search_fn(
             checkin=checkin,
             checkout=checkout,
             adults=adults,
