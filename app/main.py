@@ -83,6 +83,13 @@ async def _post_init(application: Application) -> None:
 
 def main() -> None:
     db.init()
+    # Python 3.14 removed the implicit event-loop creation in the main
+    # thread that older python-telegram-bot versions assumed. Create one.
+    import asyncio
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
     application = (
         Application.builder()
         .token(config.telegram_token())
