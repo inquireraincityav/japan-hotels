@@ -8,7 +8,9 @@ check, and list the latest prices.
 ## What it monitors
 
 - **Dates:** 2026-12-11 → 2026-12-12 (1 night) — editable via Telegram
-- **Occupancy:** 2 rooms = (2 adults + 1 infant) + (2 adults) — editable
+- **Occupancy:** checks BOTH layouts every run and ranks them together —
+  (a) one room for 4 adults + 1 infant, and (b) two rooms = (2 adults +
+  1 infant) + (2 adults). Editable in `app/config.yaml`.
 - **Area:** ≤ ~15-minute walk from Shibuya Scramble Crossing
 - **Budget:** CAD $375 total (both rooms combined, taxes & fees included) — editable
 - **Default source: fully local Booking.com search via Playwright.**

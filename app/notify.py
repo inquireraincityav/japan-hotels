@@ -11,15 +11,17 @@ def _bot() -> Bot:
 
 
 def _fmt_combo(c: dict) -> str:
-    r1, r2 = c["rooms"][0], c["rooms"][1]
-    note = "  (same hotel — confirm 2 rooms available!)" if c["same_hotel"] else ""
-    return (
-        f"• Total CAD {c['total_cad']:.2f}{note}\n"
-        f"  R1: {r1['hotel_name']} — CAD {r1['total_cad']:.2f}\n"
-        f"       <a href=\"{r1['deeplink']}\">open</a>\n"
-        f"  R2: {r2['hotel_name']} — CAD {r2['total_cad']:.2f}\n"
-        f"       <a href=\"{r2['deeplink']}\">open</a>"
-    )
+    header = f"• <b>CAD {c['total_cad']:.2f}</b>  —  {c['layout']}"
+    if c.get("same_hotel") and len(c["rooms"]) > 1:
+        header += "  (same hotel — confirm 2 rooms available!)"
+    lines = [header]
+    for i, r in enumerate(c["rooms"], 1):
+        suffix = f" · R{i}" if len(c["rooms"]) > 1 else ""
+        lines.append(
+            f'  {r["hotel_name"]}{suffix} — CAD {r["total_cad"]:.2f}  '
+            f'<a href="{r["deeplink"]}">open</a>'
+        )
+    return "\n".join(lines)
 
 
 async def send_result(result: dict, prefix: str = "") -> None:
@@ -44,12 +46,8 @@ async def send_result(result: dict, prefix: str = "") -> None:
         body = ""
 
     links = result["deeplinks"]
-    footer = (
-        "\n\n<b>Manual verification links:</b>\n"
-        f"• <a href=\"{links.get('booking_room1','')}\">Booking.com — Room 1</a>\n"
-        f"• <a href=\"{links.get('booking_room2','')}\">Booking.com — Room 2</a>\n"
-        f"• <a href=\"{links.get('google_room1','')}\">Google Hotels — Room 1</a>\n"
-        f"• <a href=\"{links.get('airbnb_room1','')}\">Airbnb — Room 1</a>"
+    footer = "\n\n<b>Manual verification links:</b>\n" + "\n".join(
+        f'• <a href="{url}">{label}</a>' for label, url in links.items()
     )
 
     msg = header + body + footer

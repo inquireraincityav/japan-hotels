@@ -2,32 +2,35 @@ dates:
   checkin: "2026-12-11"
   checkout: "2026-12-12"
 
-# Two rooms. Infant is <1yr; most Japanese hotels count only adults for
-# pricing but require declaration. We'll search 2 rooms x 2 adults each
-# and separately note that room 1 also has 1 infant (hotel-specific policy
-# dictates whether an infant adds a bed-fee).
-rooms:
-  - adults: 2
-    children_ages: [0]   # infant, <1yr
-  - adults: 2
-    children_ages: []
+# Two acceptable layouts — the bot checks BOTH each run and ranks the
+# cheapest combinations across all of them in one list.
+configurations:
+  - name: "1 room (4 adults + 1 infant)"
+    rooms:
+      - adults: 4
+        children_ages: [0]
+  - name: "2 rooms (2 adults + 1 infant / 2 adults)"
+    rooms:
+      - adults: 2
+        children_ages: [0]
+      - adults: 2
+        children_ages: []
 
-# CAD budget for BOTH rooms combined, taxes & fees included.
+# CAD budget for the WHOLE stay (one or two rooms), taxes & fees included.
 budget_cad: 375
 
-# Minutes walk from Shibuya Scramble Crossing. Hotels further than this
-# are excluded.
+# Minutes walk from Shibuya Scramble Crossing. Hotels farther than this
+# are filtered out heuristically from Google Hotels distance text.
 max_walk_minutes: 15
 
 # How often to run a scheduled check.
 check_interval_minutes: 60
 
-# Where to send the daily 09:00 summary (Y/N). Local time is read from
-# the TZ env var.
+# Daily 09:03 local-time summary (even if nothing hits the budget).
 daily_summary: true
 
-# Alert hysteresis: only re-notify about the same hotel if its price
-# changed by more than this many CAD since the last alert.
+# Alert hysteresis: suppress repeat alerts for the same combo if its
+# price moved less than this many CAD since the last alert.
 alert_delta_cad: 5
 
 paused: false

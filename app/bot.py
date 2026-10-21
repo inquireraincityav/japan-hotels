@@ -39,20 +39,24 @@ async def cmd_help(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def cmd_status(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     c = config.load()
-    rooms = "; ".join(
-        f"R{i+1}={r['adults']}a"
-        + (f"+{len(r.get('children_ages') or [])}c" if r.get("children_ages") else "")
-        for i, r in enumerate(c["rooms"])
-    )
-    await update.effective_chat.send_message(
-        f"Dates: {c['dates']['checkin']} → {c['dates']['checkout']}\n"
-        f"Rooms: {rooms}\n"
-        f"Budget: CAD {c['budget_cad']} total\n"
-        f"Max walk: {c['max_walk_minutes']} min\n"
-        f"Interval: every {c['check_interval_minutes']} min\n"
-        f"Paused: {c['paused']}\n"
-        f"FX JPY→CAD: {fx.current_rate():.5f}"
-    )
+    lines = [f"Dates: {c['dates']['checkin']} → {c['dates']['checkout']}"]
+    layouts = c.get("configurations") or [{"name": "default", "rooms": c.get("rooms", [])}]
+    lines.append("Layouts checked each run:")
+    for layout in layouts:
+        rooms = "; ".join(
+            f"R{i+1}={r['adults']}a"
+            + (f"+{len(r.get('children_ages') or [])}c" if r.get("children_ages") else "")
+            for i, r in enumerate(layout["rooms"])
+        )
+        lines.append(f"  • {layout['name']} — {rooms}")
+    lines += [
+        f"Budget: CAD {c['budget_cad']} total",
+        f"Max walk: {c['max_walk_minutes']} min",
+        f"Interval: every {c['check_interval_minutes']} min",
+        f"Paused: {c['paused']}",
+        f"FX JPY→CAD: {fx.current_rate():.5f}",
+    ]
+    await update.effective_chat.send_message("\n".join(lines))
 
 
 async def cmd_check(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:

@@ -32,7 +32,9 @@ async def scheduled_check() -> None:
             fresh = []
             delta = float(cfg.get("alert_delta_cad", 5))
             for combo in result["under_budget"]:
-                key = f"{combo['rooms'][0]['hotel_name']}|{combo['rooms'][1]['hotel_name']}"
+                key = combo["layout"] + "||" + "|".join(
+                    r["hotel_name"] for r in combo["rooms"]
+                )
                 last = db.last_alert_cad(key)
                 if last is None or abs(last - combo["total_cad"]) >= delta:
                     db.set_last_alert(key, combo["total_cad"])
