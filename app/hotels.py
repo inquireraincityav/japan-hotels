@@ -10,17 +10,17 @@ from __future__ import annotations
 import itertools
 from urllib.parse import quote_plus
 
-from . import booking_scraper, config, serpapi_hotels
+from . import config, serpapi_hotels
 
 WALK_SHORTLIST_QUERY = "hotels near Shibuya Scramble Crossing"
 
 
 def _search_fn():
-    return (
-        serpapi_hotels.search_room_bucket
-        if config.serpapi_key()
-        else booking_scraper.search_room_bucket
-    )
+    if config.serpapi_key():
+        return serpapi_hotels.search_room_bucket
+    # Lazy import so missing playwright doesn't break SerpAPI users.
+    from . import booking_scraper
+    return booking_scraper.search_room_bucket
 
 
 def booking_deeplink(checkin, checkout, adults, children_ages):

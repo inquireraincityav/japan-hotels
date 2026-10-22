@@ -4,4 +4,10 @@ pyyaml==6.0.2
 python-dotenv==1.0.1
 apscheduler==3.10.4
 tenacity==9.0.0
-playwright==1.47.0
+# Playwright (local Booking.com scraper) is OPTIONAL — only needed if
+# you want to run without a SerpAPI key. It fails to build on Python
+# 3.14 due to a greenlet incompatibility. If you're using SerpAPI,
+# leave it commented out. To enable the local scraper, install:
+#   pip install "playwright>=1.48" && playwright install chromium
+# (and use Python 3.12 or 3.13 for a smoother install)
+# playwright==1.47.0
